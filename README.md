@@ -17,7 +17,7 @@ This repository contains the complete physical layout stream files (**GDSII** an
 
 | Full-Chip Silicon Mask (KLayout) | 300 DPI Publication Die Floorplan |
 | :---: | :---: |
-| ![Full Chip Layout](images/klayout_full_chip_layout.png) | ![Die Floorplan](images/klayout_die_floorplan.png) |
+| ![Full Chip Layout](klayout_full_chip_layout.png) | ![Die Floorplan](klayout_die_floorplan.png) |
 | *21.4 MB GDSII standard cell placement & peripheral I/O pad ring* | *Floorplan with power delivery ring, macro coordinates, and pin tracks* |
 
 ---
