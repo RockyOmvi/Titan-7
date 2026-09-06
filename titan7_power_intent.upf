@@ -1,0 +1,128 @@
+################################################################################
+# Design Name       : titan7_mobile_soc_top
+# UPF Standard      : IEEE 1801-2018 (UPF 3.0)
+# Scope             : Full-Chip Multi-Voltage / Low-Power Power Management
+################################################################################
+
+upf_version 3.0
+
+# -----------------------------------------------------------------------------
+# Power Domains
+# -----------------------------------------------------------------------------
+create_power_domain PD_TOP \
+    -include_scope
+
+create_power_domain PD_CPU_PRIME \
+    -elements {u_soc_core/u_cpu_cluster/u_prime_core_0 u_soc_core/u_cpu_cluster/u_prime_core_1}
+
+create_power_domain PD_CPU_EFF \
+    -elements {u_soc_core/u_cpu_cluster/u_eff_core_cluster}
+
+create_power_domain PD_GPU \
+    -elements {u_soc_core/u_gpu_simd_cluster}
+
+create_power_domain PD_NPU \
+    -elements {u_soc_core/u_npu_systolic_top}
+
+create_power_domain PD_SLC_CACHE \
+    -elements {u_soc_core/u_slc_30mb_top}
+
+# -----------------------------------------------------------------------------
+# Supply Network
+# -----------------------------------------------------------------------------
+create_supply_port VDD_SOC  -direction in
+create_supply_port VDD_CORE -direction in
+create_supply_port VDD_GPU  -direction in
+create_supply_port VDD_NPU  -direction in
+create_supply_port VDD_SRAM -direction in
+create_supply_port VSS      -direction in
+
+create_supply_net VDD_SOC       -domain PD_TOP
+create_supply_net VSS           -domain PD_TOP
+create_supply_net VDD_PRIME_SW  -domain PD_CPU_PRIME
+create_supply_net VDD_EFF_SW    -domain PD_CPU_EFF
+create_supply_net VDD_GPU_SW    -domain PD_GPU
+create_supply_net VDD_NPU_SW    -domain PD_NPU
+create_supply_net VDD_SLC_RET   -domain PD_SLC_CACHE
+
+connect_supply_net VDD_SOC -ports VDD_SOC
+connect_supply_net VSS     -ports VSS
+
+set_domain_supply_net PD_TOP       -primary_power_net VDD_SOC      -primary_ground_net VSS
+set_domain_supply_net PD_CPU_PRIME -primary_power_net VDD_PRIME_SW -primary_ground_net VSS
+set_domain_supply_net PD_CPU_EFF   -primary_power_net VDD_EFF_SW   -primary_ground_net VSS
+set_domain_supply_net PD_GPU       -primary_power_net VDD_GPU_SW   -primary_ground_net VSS
+set_domain_supply_net PD_NPU       -primary_power_net VDD_NPU_SW   -primary_ground_net VSS
+set_domain_supply_net PD_SLC_CACHE -primary_power_net VDD_SLC_RET  -primary_ground_net VSS
+
+# -----------------------------------------------------------------------------
+# Power Switching Infrastructure
+# -----------------------------------------------------------------------------
+create_power_switch PSW_CPU_PRIME \
+    -domain PD_CPU_PRIME \
+    -input_supply_port  {vin  VDD_CORE} \
+    -output_supply_port {vout VDD_PRIME_SW} \
+    -control_port       {gate u_pmu/cpu_prime_pwr_req} \
+    -on_state           {ON_ACT vin {gate}} \
+    -off_state          {OFF_IDLE {!gate}}
+
+create_power_switch PSW_GPU \
+    -domain PD_GPU \
+    -input_supply_port  {vin  VDD_GPU} \
+    -output_supply_port {vout VDD_GPU_SW} \
+    -control_port       {gate u_pmu/gpu_pwr_req} \
+    -on_state           {ON_ACT vin {gate}} \
+    -off_state          {OFF_IDLE {!gate}}
+
+create_power_switch PSW_NPU \
+    -domain PD_NPU \
+    -input_supply_port  {vin  VDD_NPU} \
+    -output_supply_port {vout VDD_NPU_SW} \
+    -control_port       {gate u_pmu/npu_pwr_req} \
+    -on_state           {ON_ACT vin {gate}} \
+    -off_state          {OFF_IDLE {!gate}}
+
+# -----------------------------------------------------------------------------
+# Isolation & Level Shifters
+# -----------------------------------------------------------------------------
+set_isolation ISO_CPU_PRIME \
+    -domain PD_CPU_PRIME \
+    -isolation_power_net VDD_SOC \
+    -isolation_ground_net VSS \
+    -clamp_value 0 \
+    -applies_to outputs
+
+set_isolation ISO_GPU \
+    -domain PD_GPU \
+    -isolation_power_net VDD_SOC \
+    -isolation_ground_net VSS \
+    -clamp_value 0 \
+    -applies_to outputs
+
+set_isolation ISO_NPU \
+    -domain PD_NPU \
+    -isolation_power_net VDD_SOC \
+    -isolation_ground_net VSS \
+    -clamp_value 0 \
+    -applies_to outputs
+
+set_level_shifter LS_PRIME_TO_TOP \
+    -domain PD_CPU_PRIME \
+    -applies_to outputs \
+    -rule both \
+    -location to
+
+# -----------------------------------------------------------------------------
+# Power State Table (PST)
+# -----------------------------------------------------------------------------
+add_power_state -supply VDD_CORE -state {OP_TURBO 0.85} -state {OP_NOM 0.75} -state {OP_RET 0.65} -state {OP_OFF 0.0}
+add_power_state -supply VDD_GPU  -state {OP_ACT 0.80} -state {OP_OFF 0.0}
+add_power_state -supply VDD_NPU  -state {OP_ACT 0.80} -state {OP_OFF 0.0}
+add_power_state -supply VDD_SOC  -state {OP_AON 0.75}
+add_power_state -supply VDD_SRAM -state {OP_ACT 0.75} -state {OP_RET 0.50}
+
+create_power_state_table PST_TITAN7
+add_pst_state S0_PERF   -table PST_TITAN7 -state {OP_TURBO OP_ACT  OP_ACT  OP_AON OP_ACT}
+add_pst_state S1_BAL    -table PST_TITAN7 -state {OP_NOM   OP_ACT  OP_OFF  OP_AON OP_ACT}
+add_pst_state S2_LP     -table PST_TITAN7 -state {OP_RET   OP_OFF  OP_OFF  OP_AON OP_ACT}
+add_pst_state S3_SLEEP  -table PST_TITAN7 -state {OP_OFF   OP_OFF  OP_OFF  OP_AON OP_RET}

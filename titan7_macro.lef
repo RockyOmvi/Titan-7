@@ -1,0 +1,121 @@
+VERSION 5.8 ;
+BUSBITCHARS "[]" ;
+DIVIDERCHAR "/" ;
+
+MACRO titan7_mobile_soc_top
+  CLASS BLOCK ;
+  FOREIGN titan7_mobile_soc_top 0.000 0.000 ;
+  ORIGIN 0.000 0.000 ;
+  SIZE 4800.000 BY 4800.000 ;
+  SYMMETRY X Y ;
+
+  PIN VDD_SOC
+    DIRECTION INOUT ;
+    USE POWER ;
+    PORT
+      LAYER M9 ;
+        RECT 100.000 4700.000 4700.000 4750.000 ;
+    END
+  END VDD_SOC
+
+  PIN VSS
+    DIRECTION INOUT ;
+    USE GROUND ;
+    PORT
+      LAYER M9 ;
+        RECT 100.000 50.000 4700.000 100.000 ;
+    END
+  END VSS
+
+  PIN VDD_CORE
+    DIRECTION INOUT ;
+    USE POWER ;
+    PORT
+      LAYER M9 ;
+        RECT 50.000 100.000 100.000 4700.000 ;
+    END
+  END VDD_CORE
+
+  PIN clk_core_prime
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER M9 ;
+        RECT 200.000 4750.000 240.000 4790.000 ;
+    END
+  END clk_core_prime
+
+  PIN clk_axi_main
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER M9 ;
+        RECT 300.000 4750.000 340.000 4790.000 ;
+    END
+  END clk_axi_main
+
+  PIN rst_n
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER M9 ;
+        RECT 400.000 4750.000 440.000 4790.000 ;
+    END
+  END rst_n
+
+  PIN ucie_rx_data[0]
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER M9 ;
+        RECT 500.000 10.000 530.000 40.000 ;
+    END
+  END ucie_rx_data[0]
+
+  PIN ucie_tx_data[0]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER M9 ;
+        RECT 550.000 10.000 580.000 40.000 ;
+    END
+  END ucie_tx_data[0]
+
+  PIN ucie_rx_data[15]
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER M9 ;
+        RECT 1950.000 10.000 1980.000 40.000 ;
+    END
+  END ucie_rx_data[15]
+
+  PIN ucie_tx_data[15]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER M9 ;
+        RECT 2000.000 10.000 2030.000 40.000 ;
+    END
+  END ucie_tx_data[15]
+
+  OBS
+    LAYER M1 ;
+      RECT 0.000 0.000 4800.000 4800.000 ;
+    LAYER M2 ;
+      RECT 0.000 0.000 4800.000 4800.000 ;
+    LAYER M3 ;
+      RECT 0.000 0.000 4800.000 4800.000 ;
+    LAYER M4 ;
+      RECT 0.000 0.000 4800.000 4800.000 ;
+    LAYER M5 ;
+      RECT 0.000 0.000 4800.000 4800.000 ;
+    LAYER M6 ;
+      RECT 0.000 0.000 4800.000 4800.000 ;
+    LAYER M7 ;
+      RECT 0.000 0.000 4800.000 4800.000 ;
+    LAYER M8 ;
+      RECT 0.000 0.000 4800.000 4800.000 ;
+  END
+END titan7_mobile_soc_top
+END LIBRARY
